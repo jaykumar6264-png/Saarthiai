@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>सारथी AI — Bharat Ka Apna Dost</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;600&family=Orbitron:wght@400;700&family=Inter:wght@300;500;700&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --primary: #00ffaa;
+    --accent: #FF9933;
+    --glass: rgba(255,255,255,0.05);
+    --glass-border: rgba(255,255,255,0.1);
+    --text-glow: 0 0 10px rgba(0,255,170,0.5);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    font-family: 'Inter', 'Noto Sans Devanagari', sans-serif;
+    background: radial-gradient(circle at top right, #0a1f1a, #050a0f, #000);
+    color: #e0e0e0;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  .header {
+    background: rgba(5,10,15,0.8);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+  }
+  .logo-icon {
+    width: 45px; height: 45px;
+    background: linear-gradient(135deg, var(--accent), var(--primary));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; font-weight: 700; color: white;
+    box-shadow: var(--text-glow);
+    animation: float 3s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%,100% { transform: translateY(0); box-shadow: 0 5px 15px rgba(0,255,170,0.3); }
+    50% { transform: translateY(-8px); box-shadow: 0 15px 25px rgba(0,255,170,0.5); }
+  }
+  .logo-text { font-family: 'Orbitron', sans-serif; font-size: 18px; letter-spacing: 1px; }
+  .logo-text span { color: var(--primary); text-shadow: var(--text-glow); }
+  .hero {
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+  .hero h1 { font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+  .hero h1 span { color: var(--primary); }
+  .stats {
+    display: grid; grid-template-columns: repeat(4,1fr);
+    gap: 10px; padding: 1rem;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    margin: 10px; border-radius: 15px;
+  }
+  .stat-num { color: var(--primary); font-weight: 700; font-size: 14px; }
+  .stat-label { font-size: 9px; opacity: 0.7; text-transform: uppercase; }
+  .main { max-width: 600px; margin: 0 auto; padding: 10px; }
+  .chat-card {
+    background: rgba(255,255,255,0.03);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .chat-header {
+    background: rgba(255,255,255,0.05);
+    padding: 15px;
+    border-bottom: 1px solid var(--glass-border);
+  }
+  .messages {
+    padding: 1.5rem; height: 380px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .msg { max-width: 85%; }
+  .msg.bot { align-self: flex-start; }
+  .msg.user { align-self: flex-end; }
+  .msg-bubble {
+    padding: 12px 16px; border-radius: 18px;
+    font-size: 14px; line-height: 1.6;
+  }
+  .bot .msg-bubble {
+    background: rgba(0,255,170,0.1);
+    color: #fff; border: 1px solid rgba(0,255,170,0.2);
+    border-bottom-left-radius: 4px;
+  }
+  .user .msg-bubble {
+    background: linear-gradient(135deg, var(--primary), var(--accent));
+    color: #000; font-weight: 500;
+    border-bottom-right-radius: 4px;
+  }
+  .typing-dots { display: flex; gap: 4px; align-items: center; padding: 4px 0; }
+  .tdot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--primary); animation: td 1s infinite;
+  }
+  .tdot:nth-child(2){animation-delay:.15s}
+  .tdot:nth-child(3){animation-delay:.3s}
+  @keyframes td{0%,60%,100%{transform:translateY(0);opacity:0.5}30%{transform:translateY(-6px);opacity:1}}
+  .input-area {
+    padding: 15px; background: rgba(0,0,0,0.2);
+    display: flex; gap: 10px; align-items: center;
+  }
+  textarea {
+    flex: 1; background: var(--glass); border: 1px solid var(--glass-border);
+    border-radius: 15px; color: white; padding: 12px; outline: none;
+    resize: none; font-family: inherit; font-size: 14px;
+  }
+  textarea:focus { border-color: var(--primary); box-shadow: 0 0 10px rgba(0,255,170,0.2); }
+  .send-btn {
+    width: 48px; height: 48px; border-radius: 50%;
+    background: var(--primary); color: #000; border: none;
+    font-size: 20px; cursor: pointer; box-shadow: var(--text-glow);
+    flex-shrink: 0;
+  }
+  .send-btn:disabled { opacity: 0.5; }
+  .tabs {
+    display: flex; gap: 10px; overflow-x: auto; padding: 10px;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    padding: 10px 20px; border-radius: 30px; border: 1px solid var(--glass-border);
+    background: var(--glass); color: #ccc; white-space: nowrap; transition: 0.3s;
+    cursor: pointer;
+  }
+  .tab-btn.active { background: var(--primary); color: #000; font-weight: 700; }
+  .quick-wrap {
+    padding: 8px 15px 12px;
+    display: flex; flex-wrap: wrap; gap: 6px;
+    border-top: 1px solid var(--glass-border);
+  }
+  .quick-label { font-size: 11px; color: #888; width: 100%; }
+  .qbtn {
+    font-size: 11px; padding: 5px 11px;
+    border: 1px solid rgba(0,255,170,0.3);
+    border-radius: 12px; color: var(--primary);
+    background: rgba(0,255,170,0.05); cursor: pointer;
+    transition: all 0.15s;
+  }
+  .qbtn:hover { background: var(--primary); color: #000; }
+  .features { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px; }
+  .feat-card {
+    background: var(--glass); border: 1px solid var(--glass-border);
+    padding: 15px; border-radius: 18px; transition: 0.3s;
+  }
+  .feat-card:hover { transform: translateY(-5px); border-color: var(--primary); }
+  .footer {
+    text-align: center; padding: 20px;
+    font-size: 11px; color: #444;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div style="display:flex; align-items:center; gap:12px;">
+    <div class="logo-icon">स</div>
+    <div>
+      <div class="logo-text">SAARTHI <span>AI</span></div>
+      <div style="font-size:10px; color:#666;">Bharat Ka Apna Dost</div>
+    </div>
+  </div>
+  <div style="font-size:12px; color:var(--primary);" id="statusText">● AI ACTIVE</div>
+</div>
+
+<div class="hero">
+  <div style="font-size:28px; margin-bottom:8px;">🇮🇳</div>
+  <h1>Bharat Ka <span>Saarthi</span> AI</h1>
+  <p style="font-size:12px; opacity:0.6; margin-top:5px;">Hindi mein Kisan • Sehat • Yojana • Business • Kanoon</p>
+</div>
+
+<div class="stats">
+  <div style="text-align:center"><div class="stat-num">6</div><div class="stat-label">Vishay</div></div>
+  <div style="text-align:center"><div class="stat-num">AI+</div><div class="stat-label">Powered</div></div>
+  <div style="text-align:center"><div class="stat-num">FREE</div><div class="stat-label">Sabke liye</div></div>
+  <div style="text-align:center"><div class="stat-num">24/7</div><div class="stat-label">Uplabdh</div></div>
+</div>
+
+<div class="main">
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="setTab('kisan',this)">🌾 Kisan</button>
+    <button class="tab-btn" onclick="setTab('student',this)">📚 Student</button>
+    <button class="tab-btn" onclick="setTab('yojana',this)">📋 Yojana</button>
+    <button class="tab-btn" onclick="setTab('health',this)">🏥 Sehat</button>
+    <button class="tab-btn" onclick="setTab('business',this)">🏪 Business</button>
+    <button class="tab-btn" onclick="setTab('kanoon',this)">⚖️ Kanoon</button>
+  </div>
+
+  <div class="chat-card">
+    <div class="chat-header">
+      <div style="font-size:15px; font-weight:bold; color:var(--primary);" id="chatTitle">🌾 Kisan Sahayak</div>
+      <div style="font-size:11px; opacity:0.5;" id="chatSub">Mandi bhav • Fasal • Mausam • Yojana</div>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div id="quickWrap" class="quick-wrap"></div>
+
+    <div class="input-area">
+      <textarea id="msgInput" rows="1" placeholder="Hindi mein kuch bhi poochho..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <div class="features">
+    <div class="feat-card">
+      <div style="font-size:24px;">🛡️</div>
+      <div style="font-size:13px; font-weight:bold; margin-top:5px; color:var(--primary);">Safe & Secure</div>
+      <div style="font-size:11px; opacity:0.6; margin-top:3px;">Aapka data safe hai</div>
+    </div>
+    <div class="feat-card">
+      <div style="font-size:24px;">🚀</div>
+      <div style="font-size:13px; font-weight:bold; margin-top:5px; color:var(--primary);">Ultra Fast</div>
+      <div style="font-size:11px; opacity:0.6; margin-top:3px;">Turant jawab milega</div>
+    </div>
+    <div class="feat-card">
+      <div style="font-size:24px;">🌐</div>
+      <div style="font-size:13px; font-weight:bold; margin-top:5px; color:var(--primary);">Hindi First</div>
+      <div style="font-size:11px; opacity:0.6; margin-top:3px;">Apni bhasha mein</div>
+    </div>
+    <div class="feat-card">
+      <div style="font-size:24px;">💯</div>
+      <div style="font-size:13px; font-weight:bold; margin-top:5px; color:var(--primary);">Bilkul Free</div>
+      <div style="font-size:11px; opacity:0.6; margin-top:3px;">Koi charge nahi</div>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">
+  सारथी AI — Bharat Ka Apna Dost<br>
+  Made with ❤️ for India • Hindi mein • Sabke liye<br>
+  © 2026 Saarthi AI
+</div>
+
+<script>
+// ========== APNI GROQ KEY YAHAN DAALO ==========
+const API_KEY = 'APNI_GROQ_KEY_YAHAN';
+// ================================================
+
+const tabConfig = {
+  kisan: {
+    title: '🌾 Kisan Sahayak',
+    sub: 'Mandi bhav • Fasal • Mausam • Yojana',
+    welcome: 'Namaste Kisan Bhai! 🌾\n\nMain aapka Saarthi AI hoon. Mandi bhav, fasal ki salah, mausam, sarkari yojana — kuch bhi poochho, Hindi mein jawab dunga!\n\nAaj kya jaanna hai?',
+    system: 'Tu "Saarthi AI" hai — India ka Hindi agriculture assistant. Hamesha Hindi mein jawab de. Kisan ko mandi bhav, fasal salah, PM-KISAN, mausam, keetnashak, beej ki jankari de. Simple aur practical advice de.',
+    quick: ['Aaj gehu ka rate kya hai?', 'PM Kisan mein naam kaise karein?', 'Fasal bima kaise milega?', 'Keetnashak kab daalein?']
+  },
+  student: {
+    title: '📚 Free Tutor',
+    sub: 'Padhai • Board • Career • Scholarship',
+    welcome: 'Namaste Student! 📚\n\nMain tumhara free tutor hoon. Board exam, career guidance, scholarship — sab poochh sakte ho!\n\nKya samjhna hai?',
+    system: 'Tu "Saarthi AI" hai — India ka Hindi education assistant. Students ko board exam tips, career guidance, scholarship info, subject explanation Hindi mein de. Encouraging aur helpful reh.',
+    quick: ['10th ke baad kya karein?', 'Scholarship kaise milegi?', 'Medical ya Engineering?', 'English improve kaise karein?']
+  },
+  yojana: {
+    title: '📋 Yojana Expert',
+    sub: 'Sarkari schemes • Registration • Documents',
+    welcome: 'Namaste! 📋\n\nMujhe sarkari yojanaon ki poori jankari hai. Apna state batao aur kya chahiye — main sahi yojana dhundh deta hoon!\n\nKaunsi yojana chahiye?',
+    system: 'Tu "Saarthi AI" hai — India ki sarkari yojanaon ka expert. PM-KISAN, Ayushman Bharat, PM Awas, Ujjwala, Jan Dhan, Mudra Loan, Skill India — sab ki eligibility, documents, registration Hindi mein samjha.',
+    quick: ['Ayushman card kaise banaye?', 'PM Awas ke liye apply karein?', 'Free ration kaise milega?', 'Mudra loan documents kya chahiye?']
+  },
+  health: {
+    title: '🏥 Sehat Guide',
+    sub: 'Basic health • Diet • Wellness',
+    welcome: 'Namaste! 🏥\n\nMain basic health guidance de sakta hoon. Lekin gambhir bimari mein doctor zaroor dikhao!\n\nSehat ke baare mein kya jaanna hai?',
+    system: 'Tu "Saarthi AI" hai — India ka Hindi health awareness assistant. Basic symptoms, diet, lifestyle tips Hindi mein de. Serious cases mein hamesha doctor recommend kar. Government helplines 104, 108 batao.',
+    quick: ['Bukhar mein kya karein?', 'Sugar control tips?', 'BP kam karne ke upay?', 'Bachon ki vaccine schedule?']
+  },
+  business: {
+    title: '🏪 Business Mentor',
+    sub: 'Ideas • GST • Loan • Online selling',
+    welcome: 'Namaste! 🏪\n\nMain tumhara business mentor hoon. Naya business, GST, loan, online bechna — sab guide kar sakta hoon!\n\nBusiness ke baare mein kya poochna hai?',
+    system: 'Tu "Saarthi AI" hai — India ka Hindi business mentor. Small business ideas, GST, Mudra loan, Udyam registration, Meesho/Amazon selling, social media marketing — sab practical advice Hindi mein de.',
+    quick: ['Kam paison mein kaunsa business?', 'GST kaise register karein?', 'Mudra loan kaise milega?', 'Meesho par bechna kaise shuru karein?']
+  },
+  kanoon: {
+    title: '⚖️ Kanoon Dost',
+    sub: 'Rights • Consumer • Labour • Free legal aid',
+    welcome: 'Namaste! ⚖️\n\nMain basic kanuni jankari de sakta hoon. Gambhir mamlon mein zaroor vakeel se milein!\n\nKaunsa sawaal hai?',
+    system: 'Tu "Saarthi AI" hai — India ka Hindi legal awareness assistant. Consumer rights, FIR process, labour laws, RTI, free legal aid (NALSA) — sab simple Hindi mein samjha. Tu lawyer nahi hai — awareness deta hai.',
+    quick: ['FIR kaise likhwayein?', 'Consumer court mein case kaise karein?', 'Free vakeel kaise milega?', 'Zameen ka jhagda kaise suljhaye?']
+  }
+};
+
+let currentTab = 'kisan';
+let chatHistory = [];
+let isTyping = false;
+
+function setTab(tab, btn) {
+  currentTab = tab;
+  chatHistory = [];
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('chatTitle').textContent = tabConfig[tab].title;
+  document.getElementById('chatSub').textContent = tabConfig[tab].sub;
+  document.getElementById('messages').innerHTML = '';
+  renderQuickBtns();
+  addMessage('bot', tabConfig[tab].welcome);
+}
+
+function renderQuickBtns() {
+  const wrap = document.getElementById('quickWrap');
+  const btns = tabConfig[currentTab].quick.map(q =>
+    `<button class="qbtn" onclick="quickAsk('${q.replace(/'/g,"&#39;")}')">${q}</button>`
+  ).join('');
+  wrap.innerHTML = `<span class="quick-label">Jaldi poochho:</span>${btns}`;
+}
+
+function quickAsk(q) {
+  document.getElementById('msgInput').value = q;
+  sendMessage();
+}
+
+function addMessage(type, text) {
+  const msgs = document.getElementById('messages');
+  const now = new Date().toLocaleTimeString('hi-IN', {hour:'2-digit', minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = `msg ${type}`;
+  div.innerHTML = `
+    <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>
+    <div style="font-size:10px; color:#555; margin-top:3px; padding:0 4px;">${type === 'bot' ? 'Saarthi AI' : 'Aap'} • ${now}</div>
+  `;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function showTyping() {
+  const msgs = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = 'msg bot'; div.id = 'typingIndicator';
+  div.innerHTML = `<div class="msg-bubble"><div class="typing-dots"><div class="tdot"></div><div class="tdot"></div><div class="tdot"></div></div></div>`;
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeTyping() {
+  document.getElementById('typingIndicator')?.remove();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+async function sendMessage() {
+  const input = document.getElementById('msgInput');
+  const text = input.value.trim();
+  if (!text || isTyping) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  addMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  isTyping = true;
+  document.getElementById('sendBtn').disabled = true;
+  showTyping();
+
+  try {
+    const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        max_tokens: 600,
+        messages: [
+          { role: 'system', content: tabConfig[currentTab].system },
+          ...chatHistory.slice(-10)
+        ]
+      })
+    });
+
+    const data = await response.json();
+    removeTyping();
+
+    if (data.choices && data.choices[0]) {
+      const reply = data.choices[0].message.content;
+      chatHistory.push({ role: 'assistant', content: reply });
+      if (chatHistory.length > 20) chatHistory = chatHistory.slice(-20);
+      addMessage('bot', reply);
+    } else if (data.error) {
+      addMessage('bot', `⚠️ Error: ${data.error.message}\n\nAPI key check karo!`);
+    }
+  } catch(e) {
+    removeTyping();
+    addMessage('bot', '⚠️ Network error! Internet connection check karo aur dobara try karo.');
+  }
+
+  isTyping = false;
+  document.getElementById('sendBtn').disabled = false;
+}
+
+// INIT
+renderQuickBtns();
+addMessage('bot', tabConfig['kisan'].welcome);
+</script>
+</body>
+</html>
